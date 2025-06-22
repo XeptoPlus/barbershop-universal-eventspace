@@ -1,103 +1,209 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [email, setEmail] = useState('');
+  const [currentCount, setCurrentCount] = useState(2);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    // Fetch current count on component mount
+    fetchCurrentCount();
+  }, []);
+
+  const fetchCurrentCount = async () => {
+    try {
+      const response = await fetch('/api/count');
+      const data = await response.json();
+      setCurrentCount(data.count);
+    } catch (error) {
+      console.error('Error fetching count:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      setMessage('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/submit-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Successfully registered! Welcome to our premium client list.');
+        setEmail('');
+        setCurrentCount(data.newCount);
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
+      } else {
+        setMessage(data.message || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      setMessage('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-emerald-950">
+      {/* Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}
+      />
+      
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 text-center">
+          {/* Logos */}
+          <div className="mb-8">
+            <div className="flex flex-col items-center space-y-4">
+              {/* AppointMe Logo */}
+              <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+                <Image
+                  src="/PLOGO.png"
+                  alt="AppointMe Logo"
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              {/* Partnership indicator */}
+              <div className="text-xs text-emerald-400 uppercase tracking-widest">
+                In Partnership With
+              </div>
+              
+              {/* Universal Eventspace Logo */}
+              <div className="w-40 h-32 flex items-center justify-center p-2 shadow-lg -mt-6">
+                <Image
+                  src="/universal.png"
+                  alt="Universal Eventspace Logo"
+                  width={160}
+                  height={128}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Main Heading */}
+          <div className="space-y-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
+              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                AppointMe
+              </span>
+              <br />
+              <span className="text-2xl sm:text-3xl text-gray-300">
+                Universal Eventspace
+              </span>
+            </h1>
+            
+            <p className="text-lg text-gray-400 max-w-sm mx-auto">
+              Exclusive event booking platform for Universal Eventspace by Peter & Paul's Hospitality Group
+            </p>
+            
+            <div className="text-sm text-emerald-400 font-medium">
+              Powered by Onetap Software
+            </div>
+          </div>
+
+          {/* Counter */}
+          <div className="bg-gray-900/60 backdrop-blur-sm border border-emerald-800/30 rounded-2xl p-6 shadow-xl">
+            <div className="text-center space-y-2">
+              <p className="text-gray-400 text-sm uppercase tracking-wider">
+                Accepting Only
+              </p>
+              <div className="text-3xl font-bold text-white">
+                <span className="text-emerald-400">{currentCount}</span>
+                <span className="text-gray-500 mx-2">/</span>
+                <span>50</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Premium Event Bookings
+              </p>
+              <div className="w-full bg-gray-800 rounded-full h-2 mt-4">
+                <div 
+                  className="bg-gradient-to-r from-emerald-400 to-teal-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${(currentCount / 50) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Email Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                className="w-full px-4 py-4 bg-gray-900/50 backdrop-blur-sm border border-emerald-800/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+                required
+              />
+            </div>
+            
+            <button
+              type="submit"
+              disabled={isSubmitting || currentCount >= 50}
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Securing Your Booking...</span>
+                </div>
+              ) : currentCount >= 50 ? (
+                'Event Bookings Full'
+              ) : (
+                'Reserve Your Event Slot'
+              )}
+            </button>
+          </form>
+
+          {/* Message */}
+          {message && (
+            <div className={`p-4 rounded-xl ${
+              message.includes('Successfully') 
+                ? 'bg-green-900/50 border border-green-700 text-green-300' 
+                : 'bg-red-900/50 border border-red-700 text-red-300'
+            }`}>
+              {message}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="pt-4 text-sm text-gray-500 space-y-2">
+            <p>© 2025 AppointMe by Onetap Software</p>
+            <p className="text-xs">
+              In partnership with Universal Eventspace - Peter & Paul's Hospitality Group
+            </p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
