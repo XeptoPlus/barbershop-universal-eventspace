@@ -13,7 +13,7 @@ async function readEmailData(): Promise<EmailData> {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf8');
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
     // If file doesn't exist, return default data
     return { emails: [], count: 2 };
   }

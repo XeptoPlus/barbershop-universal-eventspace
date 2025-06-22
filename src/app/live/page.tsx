@@ -174,7 +174,7 @@ export default function LiveDashboard() {
           <div className="text-center mt-8 text-sm text-gray-500 space-y-2">
             <p>© 2025 AppointMe by Onetap Software</p>
             <p className="text-xs">
-              In partnership with Universal Eventspace - Peter & Paul's Hospitality Group
+              In partnership with Universal Eventspace - Peter &amp; Paul&apos;s Hospitality Group
             </p>
           </div>
         </div>

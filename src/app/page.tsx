@@ -19,8 +19,8 @@ export default function Home() {
       const response = await fetch('/api/count');
       const data = await response.json();
       setCurrentCount(data.count);
-    } catch (error) {
-      console.error('Error fetching count:', error);
+    } catch (_error) {
+      console.error('Error fetching count:', _error);
     }
   };
 
@@ -58,7 +58,7 @@ export default function Home() {
       } else {
         setMessage(data.message || 'Something went wrong. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setMessage('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -122,7 +122,7 @@ export default function Home() {
             </h1>
             
             <p className="text-lg text-gray-400 max-w-sm mx-auto">
-              Exclusive event booking platform for Universal Eventspace by Peter & Paul's Hospitality Group
+              Exclusive event booking platform for Universal Eventspace by Peter &amp; Paul&apos;s Hospitality Group
             </p>
             
             <div className="text-sm text-emerald-400 font-medium">
@@ -199,7 +199,7 @@ export default function Home() {
           <div className="pt-4 text-sm text-gray-500 space-y-2">
             <p>© 2025 AppointMe by Onetap Software</p>
             <p className="text-xs">
-              In partnership with Universal Eventspace - Peter & Paul's Hospitality Group
+              In partnership with Universal Eventspace - Peter &amp; Paul&apos;s Hospitality Group
             </p>
           </div>
         </div>
