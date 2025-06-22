@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../../lib/firebase';
+import { getDB } from '../../../../lib/firebase';
 
 interface EmailData {
   emails: string[];
@@ -8,6 +8,7 @@ interface EmailData {
 
 async function getEmailData(): Promise<EmailData> {
   try {
+    const db = getDB();
     const doc = await db.collection('app-data').doc('emails').get();
     if (doc.exists) {
       return doc.data() as EmailData;
@@ -29,4 +30,4 @@ export async function GET() {
     console.error('Error reading email data from Firestore');
     return NextResponse.json({ emails: [], count: 2 });
   }
-} 
+}
