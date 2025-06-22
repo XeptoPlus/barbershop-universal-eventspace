@@ -1,31 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDB } from '../../../../lib/firebase';
-
-interface EmailData {
-  emails: string[];
-  count: number;
-}
-
-async function getEmailData(): Promise<EmailData> {
-  try {
-    const db = getDB();
-    const doc = await db.collection('app-data').doc('emails').get();
-    if (doc.exists) {
-      return doc.data() as EmailData;
-    } else {
-      // If document doesn't exist, return default data
-      return { emails: [], count: 2 };
-    }
-  } catch {
-    // If there's an error, return default data
-    return { emails: [], count: 2 };
-  }
-}
-
-async function saveEmailData(data: EmailData): Promise<void> {
-  const db = getDB();
-  await db.collection('app-data').doc('emails').set(data);
-}
+import { getEmailData, saveEmailData } from '../../../../lib/googlesheets';
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,7 +34,7 @@ export async function POST(request: NextRequest) {
     emailData.emails.push(email.toLowerCase());
     emailData.count += 1;
 
-    // Save to Firestore
+    // Save to Google Sheets
     await saveEmailData(emailData);
 
     return NextResponse.json({
