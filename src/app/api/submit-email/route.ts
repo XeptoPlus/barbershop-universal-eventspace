@@ -1,37 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'emails.json');
+import { kv } from '@vercel/kv';
 
 interface EmailData {
   emails: string[];
   count: number;
 }
 
-async function ensureDataDirectory() {
-  const dataDir = path.join(process.cwd(), 'data');
+async function getEmailData(): Promise<EmailData> {
   try {
-    await fs.access(dataDir);
+    const data = await kv.get<EmailData>('email-data');
+    return data || { emails: [], count: 2 };
   } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-async function readEmailData(): Promise<EmailData> {
-  try {
-    await ensureDataDirectory();
-    const data = await fs.readFile(DATA_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch {
-    // If file doesn't exist, return default data
     return { emails: [], count: 2 };
   }
 }
 
-async function writeEmailData(data: EmailData): Promise<void> {
-  await ensureDataDirectory();
-  await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+async function setEmailData(data: EmailData): Promise<void> {
+  await kv.set('email-data', data);
 }
 
 export async function POST(request: NextRequest) {
@@ -45,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const emailData = await readEmailData();
+    const emailData = await getEmailData();
 
     // Check if we've reached the limit
     if (emailData.count >= 50) {
@@ -67,8 +52,8 @@ export async function POST(request: NextRequest) {
     emailData.emails.push(email.toLowerCase());
     emailData.count += 1;
 
-    // Save to file
-    await writeEmailData(emailData);
+    // Save to KV store
+    await setEmailData(emailData);
 
     return NextResponse.json({
       message: 'Successfully registered!',
